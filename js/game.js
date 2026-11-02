@@ -77,7 +77,7 @@
     document.querySelectorAll('.lvl').forEach(x => x.classList.toggle('on', x === b));
   });
   function showMenu() {
-    stopFx(); $('#play').hidden = true; $('#menu').hidden = false; buildMenu();
+    idleStop(); stopFx(); $('#play').hidden = true; $('#menu').hidden = false; buildMenu();
     try { speechSynthesis.cancel(); } catch (e) { /* ignore */ }
   }
 
@@ -94,6 +94,8 @@
     board = document.createElement('div'); board.id = 'board';
     board.innerHTML = `<div class="ghost"><svg viewBox="0 0 400 400">${d.art('g' + (uid++) + '-')}</svg></div><div class="full"><svg viewBox="0 0 400 400">${d.art('f' + (uid++) + '-')}</svg></div>`;
     stage.appendChild(board);
+    $('#ref').innerHTML = `<svg viewBox="0 0 400 400">${d.art('r' + (uid++) + '-')}</svg>`;
+    idleReset();
     slots = []; pieces = [];
     for (let k = 0; k < n * n; k++) {
       const s = document.createElement('div'); s.className = 'slot'; board.appendChild(s); slots.push(s);
@@ -157,7 +159,7 @@
     const el = p.el; let sx, sy, fx, fy, t0, moved;
     el.addEventListener('pointerdown', (e) => {
       if (p.placed || finished || p.dragging) return;
-      audio(); e.preventDefault(); el.setPointerCapture(e.pointerId);
+      audio(); idleReset(); e.preventDefault(); el.setPointerCapture(e.pointerId);
       const r = stage.getBoundingClientRect(), X = e.clientX - r.left, Y = e.clientY - r.top;
       fx = (X - p.x) / (cell * p.s); fy = (Y - p.y) / (cell * p.s);   // จุดที่จับ (สัดส่วนในชิ้น)
       sx = X; sy = Y; t0 = performance.now(); moved = false; p.dragging = true;
@@ -172,6 +174,7 @@
     });
     const end = (e) => {
       if (!p.dragging) return;
+      idleReset();
       p.dragging = false; el.classList.remove('drag');
       const sl = { x: bx + (p.idx % n) * cell, y: by + ((p.idx / n) | 0) * cell };
       const d = Math.hypot(p.x - sl.x, p.y - sl.y);
@@ -196,9 +199,23 @@
   }
   $('#hint').onclick = () => { audio(); const left = pieces.filter(p => !p.placed); if (left.length) hint(left[(Math.random() * left.length) | 0]); };
 
+  // ---------- มือสาธิตการลาก (สอนใช้เมาส์) ----------
+  let idleT = 0, hand = null;
+  function idleStop() { clearTimeout(idleT); if (hand) { hand.remove(); hand = null; } }
+  function idleReset() { idleStop(); if (!finished) idleT = setTimeout(demo, 5000); }
+  function demo() {
+    const p = pieces.find(q => !q.placed && !q.dragging); if (!p || finished) return;
+    const t = tray.t / 2, fx = p.x + t, fy = p.y + t;
+    const tx = bx + (p.idx % n) * cell + cell / 2, ty = by + ((p.idx / n) | 0) * cell + cell / 2;
+    hand = document.createElement('div'); hand.id = 'hand'; hand.textContent = '👆'; stage.appendChild(hand);
+    const s = slots[p.idx]; s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash');
+    const f = (x, y, sc) => `translate(${x}px,${y}px) scale(${sc})`;
+    hand.animate([{ transform: f(fx, fy, 1), offset: 0 }, { transform: f(fx, fy, .85), offset: .15 }, { transform: f(tx, ty, .85), offset: .75 }, { transform: f(tx, ty, 1), offset: .85 }, { transform: f(tx, ty, 1), offset: 1 }], { duration: 2400, iterations: 2 }).onfinish = () => { idleReset(); };
+  }
+
   // ---------- ชนะ ----------
   function win() {
-    finished = true; const d = DINOS[cur];
+    finished = true; idleStop(); const d = DINOS[cur];
     board.classList.add('done'); stage.classList.add('done');
     save.done[d.id] = save.done[d.id] || {}; save.done[d.id][n] = true; persist();
     sfx.fanfare(); setTimeout(sfx.roar, 500); setTimeout(() => speak(d.th), 1900);
