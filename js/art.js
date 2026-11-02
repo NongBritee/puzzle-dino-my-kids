@@ -350,6 +350,186 @@
       `<path d="M150 336h26M222 336h26" stroke="#fff6dc" stroke-width="0"/>` + toes(160, 338) + toes(238, 338) + flakes;
   }
 
+  // ======== ชุดที่ 2: สไตล์การ์ตูนตัวละคร (เส้นขอบหนา ตาโต ลายจุด กอหญ้า) ========
+  const ceye = (x, y, r, iris) =>
+    `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#1d1d1d" stroke-width="3.5"/><circle cx="${x + r * .12}" cy="${y + r * .05}" r="${r * .7}" fill="${iris}"/><circle cx="${x + r * .12}" cy="${y + r * .05}" r="${r * .4}" fill="#111"/><circle cx="${x + r * .38}" cy="${y - r * .28}" r="${r * .24}" fill="#fff"/><circle cx="${x - r * .15}" cy="${y + r * .3}" r="${r * .1}" fill="#fff"/>`;
+  const grass = (x, y, s, c = '#3fa84a', o = '#1d5a2a') => {
+    const b = (dx, h, w) => `<path d="M${x + dx - w} ${y}L${x + dx} ${y - h * s}L${x + dx + w} ${y}Z"/>`;
+    const sh = b(-12, 26, 6) + b(0, 34, 7) + b(12, 24, 6);
+    return `<g fill="${o}" stroke="${o}" stroke-width="6" stroke-linejoin="round">${sh}</g><g fill="${c}">${sh}</g>`;
+  };
+  const spots = (arr, c) => arr.map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${(r * .78).toFixed(1)}" fill="${c}"/>`).join('');
+  const shadow = (x, y, rx) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="9" fill="#000" opacity=".22"/>`;
+  const teethLine = (x0, y0, x1, y1, n, sz, down = true) => {
+    let s = '';
+    for (let i = 0; i < n; i++) {
+      const t = n === 1 ? 0 : i / (n - 1), x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t;
+      s += `<path d="M${(x - sz / 2).toFixed(1)} ${y.toFixed(1)}l${sz} 0l${-sz / 2} ${down ? sz * 1.6 : -sz * 1.6}z" fill="#fff" stroke="#6a3030" stroke-width="1.5" stroke-linejoin="round"/>`;
+    }
+    return s;
+  };
+
+  // ---------- 11. จิกาโนโตซอรัส : พายุสายฟ้ากับดอกไม้ยักษ์ ----------
+  function giga(p) {
+    const B = '#4a6cf0', D = '#18287a';
+    const flowerBig = (x, y, s, c1, c2) => {
+      let o = `<path d="M${x} ${y}C${x - 8 * s} ${y - 40 * s} ${x + 6 * s} ${y - 60 * s} ${x} ${y - 70 * s}" stroke="#1f8a5a" stroke-width="${5 * s}" fill="none"/><circle cx="${x}" cy="${y - 80 * s}" r="${46 * s}" fill="${c1}" opacity=".3"/>`;
+      for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283; o += `<ellipse cx="${(x + Math.cos(a) * 17 * s).toFixed(1)}" cy="${(y - 80 * s + Math.sin(a) * 17 * s).toFixed(1)}" rx="${13 * s}" ry="${9 * s}" transform="rotate(${(a * 57.3).toFixed(0)} ${(x + Math.cos(a) * 17 * s).toFixed(1)} ${(y - 80 * s + Math.sin(a) * 17 * s).toFixed(1)})" fill="${c1}"/>`; }
+      return o + `<circle cx="${x}" cy="${y - 80 * s}" r="${9 * s}" fill="${c2}"/>`;
+    };
+    return sky(p, [[0, '#150c3a'], [.45, '#4b2585'], [.8, '#c0509a'], [1, '#ff9ac0']]) +
+      `<defs>${glowDef(p + 'lg', '#fff6a0', 1)}</defs>` +
+      `<g fill="#2a1760"><ellipse cx="60" cy="50" rx="90" ry="36"/><ellipse cx="330" cy="40" rx="100" ry="40"/><ellipse cx="190" cy="85" rx="80" ry="28"/><ellipse cx="380" cy="120" rx="50" ry="22"/></g>` +
+      `<g fill="#6a3aa8" opacity=".8"><ellipse cx="70" cy="95" rx="60" ry="20"/><ellipse cx="310" cy="85" rx="70" ry="20"/></g>` +
+      `<circle cx="215" cy="150" r="90" fill="url(#${p}lg)" opacity=".7"/><path d="M232 60L196 140L222 140L190 230L262 120L232 120L262 60Z" fill="#fff36b" stroke="#ffb400" stroke-width="4" stroke-linejoin="round"/>` +
+      `<path d="M-10 300L40 210L90 280L150 200L210 290L280 215L340 285L410 230V320H-10Z" fill="#3a1d6e"/><path d="M0 318Q100 300 200 316T400 308V400H0Z" fill="#40206f"/><path d="M0 352Q120 338 220 354T400 348V400H0Z" fill="#2c1556"/>` +
+      flowerBig(40, 345, .95, '#ff7bd8', '#ffe14d') + flowerBig(360, 352, 1.05, '#5fe3ff', '#fff') + flowerBig(330, 390, .6, '#ffb347', '#fff') + fly(14, 12, 150, 320, '#ffe6ff') +
+      shadow(200, 344, 130) +
+      blob([
+        '<path d="M135 215C92 232 45 226 10 196C28 262 80 298 152 292Z"/>',
+        '<ellipse cx="190" cy="232" rx="66" ry="78"/>',
+        { l: 'M165 285L148 328', w: 42 }, { l: 'M130 337L176 337', w: 24 }, { l: 'M215 290L226 328', w: 38 }, { l: 'M214 337L260 337', w: 22 },
+        '<path d="M195 180C195 150 208 128 228 116L284 144L250 205Z"/>',
+        '<path d="M226 146L334 130C338 168 306 192 268 190C240 186 226 168 226 146Z"/>'
+      ], B, D, 11) +
+      `<ellipse cx="206" cy="258" rx="40" ry="56" fill="#ffe9a8"/>` +
+      `<g fill="none" stroke="#2f4ad0" stroke-width="7" stroke-linecap="round"><path d="M135 208q16-14 36-10M150 228q18-14 38-10M170 190q16-8 32-2"/></g>` +
+      spots([[60, 232, 9], [95, 250, 8], [30, 215, 6]], '#2f4ad0') +
+      `<path d="M232 148L330 134C330 164 304 180 270 178C250 176 236 166 232 148Z" fill="#c7283f"/><ellipse cx="278" cy="170" rx="24" ry="8" fill="#ff7f9a"/>` +
+      blob(['<path d="M208 112C208 64 275 50 322 76C346 90 352 118 336 134L226 152C212 142 208 126 208 112Z"/>'], B, D, 11) +
+      teethLine(244, 150, 326, 136, 6, 9) + teethLine(262, 184, 318, 174, 3, 7, false) +
+      ceye(278, 94, 15, '#ffd23f') + `<path d="M256 70q22-14 44 2" fill="none" stroke="${D}" stroke-width="7" stroke-linecap="round"/><ellipse cx="340" cy="104" rx="3.4" ry="5" fill="${D}"/>` + blush(250, 126, 9) +
+      `<path d="M222 82l6-18l8 14M240 62l8-16l6 16" fill="#7f9bff" stroke="${D}" stroke-width="3.5" stroke-linejoin="round"/>` +
+      blob([{ l: 'M234 212L264 234', w: 12 }], B, D, 6) + `<path d="M264 234l10 2m-10-2l8 8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>` + toes(150, 340) + toes(232, 340) +
+      grass(52, 348, 1, '#3fa84a', '#1d5a2a') + grass(350, 352, 1.1);
+  }
+
+  // ---------- 12. อาร์เจนติโนซอรัส : รุ่งอรุณกับบอลลูน ----------
+  function argent(p) {
+    const B = '#6fe0b0', D = '#1b6b55';
+    const balloon = (x, y, s, c1, c2) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-22 0C-30 -34 -10 -56 0 -56C10 -56 30 -34 22 0Z" fill="${c1}" stroke="#fff" stroke-width="2"/><path d="M-6 0C-14 -30 -4 -52 0 -56C4 -52 14 -30 6 0Z" fill="${c2}"/><path d="M-12 4L-8 18H8L12 4Z" fill="#a8683a"/><path d="M-12 4L-8 18M12 4L8 18" stroke="#6a3f1f" stroke-width="2"/></g>`;
+    const bird = (x, y, s = 1) => `<path d="M${x - 8 * s} ${y}q${4 * s} ${-6 * s} ${8 * s} 0q${4 * s} ${-6 * s} ${8 * s} 0" fill="none" stroke="#7a4a6a" stroke-width="2.5" stroke-linecap="round"/>`;
+    const tinyBird = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="7" fill="#ffd24d" stroke="#8a5a10" stroke-width="2.5"/><path d="M${x + 7} ${y - 2}l7 2l-7 3z" fill="#ff8a3d"/><circle cx="${x + 3}" cy="${y - 2}" r="1.8" fill="#222"/>`;
+    return sky(p, [[0, '#ffa8c8'], [.45, '#ffd0a0'], [.8, '#fff0b0'], [1, '#fffbe0']]) +
+      `<defs>${glowDef(p + 'sn', '#fffbd0', 1)}</defs><circle cx="205" cy="270" r="170" fill="url(#${p}sn)"/><circle cx="205" cy="270" r="62" fill="#fff6b8"/>` +
+      `<g stroke="#fff6b8" stroke-width="6" stroke-linecap="round" opacity=".6">${[0, 1, 2, 3, 4, 5, 6].map(i => { const a = Math.PI * (1.05 + i * .15); return `<path d="M${(205 + Math.cos(a) * 80).toFixed(0)} ${(270 + Math.sin(a) * 80).toFixed(0)}L${(205 + Math.cos(a) * 130).toFixed(0)} ${(270 + Math.sin(a) * 130).toFixed(0)}"/>`; }).join('')}</g>` +
+      balloon(70, 130, 1.1, '#ff6b8a', '#ffd24d') + balloon(330, 90, 1, '#4dabf7', '#fff') + balloon(250, 170, .7, '#9775fa', '#ff9de0') + bird(140, 80) + bird(300, 150, .8) + bird(40, 60, .7) +
+      cloud(40, 250, 1.1, '#fff', .95) + cloud(360, 240, 1.2, '#fff', .95) + cloud(130, 215, .8, '#ffe8f0', .9) +
+      `<path d="M0 300Q100 280 200 298T400 290V400H0Z" fill="#a8e6a0"/><path d="M0 340Q120 322 220 342T400 334V400H0Z" fill="#7bd68a"/>` +
+      flower(30, 372, 7, '#ff8fd0') + flower(380, 378, 7, '#fff') + flower(90, 388, 5, '#ffd24d', '#ff8fd0') +
+      shadow(200, 346, 160) +
+      blob([
+        '<path d="M110 222C75 234 45 222 26 186C12 180 8 196 14 208C34 262 85 292 138 288Z"/>',
+        '<ellipse cx="200" cy="250" rx="118" ry="68"/>',
+        '<path d="M268 235C300 195 296 150 290 112L338 114C346 156 350 215 322 268Z"/>',
+        '<ellipse cx="322" cy="92" rx="40" ry="29"/>',
+        { l: 'M118 300L118 336', w: 48 }, { l: 'M170 306L172 338', w: 46 }, { l: 'M238 306L238 338', w: 46 }, { l: 'M288 298L292 336', w: 48 },
+      ], B, D, 11) +
+      `<ellipse cx="208" cy="288" rx="92" ry="28" fill="#d9fff0"/>` +
+      spots([[120, 232, 12], [165, 215, 13], [215, 220, 12], [260, 235, 11], [300, 165, 8], [310, 205, 8], [90, 258, 8]], '#3fc08f') +
+      `<g fill="#3fc08f" stroke="${D}" stroke-width="3.5" stroke-linejoin="round"><path d="M294 190l-14 -4l14 -10z M298 160l-14 -4l14 -10z M300 130l-12 -4l12 -10z M138 204l-4 -16l14 8z M176 192l-2 -16l14 8z M214 190l0 -16l14 8z"/></g>` +
+      tinyBird(180, 186) + tinyBird(240, 192) +
+      ceye(334, 86, 12.5, '#7a4a2a') + smile(332, 104, 22, D) + blush(312, 102, 8) + `<ellipse cx="358" cy="92" rx="2.4" ry="3.4" fill="${D}"/>` +
+      toes(118, 340) + toes(172, 342) + toes(238, 342) + toes(292, 340) + grass(40, 354, 1.1) + grass(360, 352, 1);
+  }
+
+  // ---------- 13. อิกัวโนดอน : ปราสาทเทพนิยาย ----------
+  function igua(p) {
+    const B = '#ff8a65', D = '#8f2f14';
+    const tower = (x, y, w, h, wall, roof) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${wall}"/><path d="M${x - 6} ${y}L${x + w / 2} ${y - w * 1.1}L${x + w + 6} ${y}Z" fill="${roof}"/><path d="M${x + w / 2} ${y - w * 1.1}v-16" stroke="#7a5a3a" stroke-width="2.5"/><path d="M${x + w / 2} ${y - w * 1.1 - 16}l14 5l-14 5z" fill="#ff6b8a"/><rect x="${x + w / 2 - 4}" y="${y + 14}" width="8" height="14" rx="4" fill="#6a5a9a"/>`;
+    const butter = (x, y, c) => `<g transform="translate(${x} ${y})"><ellipse cx="-7" cy="-3" rx="8" ry="6" fill="${c}"/><ellipse cx="7" cy="-3" rx="8" ry="6" fill="${c}"/><ellipse cx="-5" cy="5" rx="5" ry="4" fill="${c}"/><ellipse cx="5" cy="5" rx="5" ry="4" fill="${c}"/><rect x="-1.2" y="-6" width="2.4" height="14" rx="1.2" fill="#4a2a5a"/></g>`;
+    return sky(p, [[0, '#8fd5ff'], [.7, '#d8f1ff'], [1, '#fff6ea']]) +
+      cloud(70, 70, 1.2) + cloud(230, 40, .8) + cloud(350, 110, 1) +
+      `<path d="M150 330C190 230 240 220 280 220C330 220 380 250 420 330Z" fill="#8edc88"/>` +
+      `<rect x="250" y="178" width="110" height="60" fill="#ffe2f0"/>` + tower(238, 150, 34, 90, '#ffd0e6', '#7a8cff') + tower(340, 140, 38, 100, '#ffd0e6', '#7a8cff') + tower(284, 120, 44, 118, '#fff0f6', '#ff7aa8') +
+      `<path d="M300 238v-34a12 12 0 0 1 24 0v34Z" fill="#8a5aa8"/>` +
+      `<path d="M-10 322Q80 270 170 310T420 300V400H-10Z" fill="#6fd678"/><path d="M0 300Q60 280 110 296" fill="none" stroke="#a8f0a0" stroke-width="6" opacity=".7"/>` +
+      `<path d="M0 346Q120 328 220 348T400 340V400H0Z" fill="#4cc26a"/>` +
+      `<path d="M215 338Q250 300 276 250" fill="none" stroke="#fff2c0" stroke-width="12" stroke-linecap="round" opacity=".9"/>` +
+      butter(60, 200, '#ff9de0') + butter(150, 140, '#ffd24d') + butter(360, 270, '#9de0ff') + butter(30, 130, '#b9a0ff') +
+      flower(25, 372, 7, '#ff8fd0') + flower(375, 370, 7, '#ffd24d', '#ff8fd0') + flower(110, 390, 6, '#fff') + flower(290, 386, 6, '#ff8fd0') +
+      shadow(200, 344, 130) +
+      blob([
+        '<path d="M130 245C85 260 45 248 14 214C18 272 80 305 150 290Z"/>',
+        '<ellipse cx="195" cy="238" rx="78" ry="60"/>',
+        { l: 'M170 280L152 326', w: 42 }, { l: 'M132 337L180 337', w: 24 }, { l: 'M225 284L240 326', w: 38 }, { l: 'M226 337L272 337', w: 22 },
+        '<path d="M232 195C246 168 262 150 282 138L322 170L282 240Z"/>',
+        { l: 'M240 216L292 200', w: 15 }, { l: 'M250 232L282 255', w: 13 },
+      ], B, D, 11) +
+      `<ellipse cx="208" cy="262" rx="46" ry="38" fill="#ffd9c0"/>` +
+      `<g fill="none" stroke="#e06030" stroke-width="7" stroke-linecap="round"><path d="M135 218q16-14 36-10M152 200q18-12 38-6M180 184q16-8 32-2"/></g>` + spots([[70, 252, 9], [100, 268, 8], [40, 240, 6]], '#e06030') +
+      blob(['<path d="M268 132C272 100 312 94 346 112C364 122 362 148 344 154L288 160C274 154 266 144 268 132Z"/>'], B, D, 11) +
+      `<path d="M334 116C358 112 372 126 366 142C358 156 340 152 334 142Z" fill="#ffd76b" stroke="#a8761b" stroke-width="5" stroke-linejoin="round"/>` +
+      ceye(312, 122, 13, '#2f9a4a') + `<path d="M298 104q14-8 28 0" fill="none" stroke="${D}" stroke-width="5" stroke-linecap="round"/>` + smile(318, 150, 22, D) + blush(298, 142, 8) + `<ellipse cx="354" cy="122" rx="2.5" ry="3.4" fill="${D}"/>` +
+      `<path d="M296 196l22-16l4 14z" fill="#fff6dc" stroke="#c9a85c" stroke-width="3.5" stroke-linejoin="round"/><path d="M290 198l12 4m-12-4l12-6m-12 6l8 8" stroke="#fff6dc" stroke-width="5" stroke-linecap="round"/>` +
+      toes(156, 341) + toes(246, 341) + grass(48, 354, 1) + grass(352, 356, 1.1);
+  }
+
+  // ---------- 14. แพคิเซฟาโลซอรัส : คืนฟักทองฮาโลวีน ----------
+  function pachy(p) {
+    const B = '#b5e04a', D = '#4a6a10';
+    const pumpkin = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse rx="52" ry="42" fill="#ff8a1f" stroke="#a84a00" stroke-width="5"/><path d="M-30 -36Q-44 0 -30 36M0 -41V41M30 -36Q44 0 30 36" fill="none" stroke="#d96a00" stroke-width="5"/><rect x="-5" y="-54" width="10" height="16" rx="3" fill="#4a7a2a"/><path d="M-20 -8l10 -14l10 14zM10 -8l10 -14l10 14z" fill="#fff0a0"/><path d="M-22 12Q0 34 22 12Q0 22 -22 12Z" fill="#fff0a0"/></g>`;
+    const bat = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#2a1450"><path d="M0 0C-6 -10 -18 -12 -28 -4C-22 -4 -20 2 -14 4C-12 0 -6 2 0 8C6 2 12 0 14 4C20 2 22 -4 28 -4C18 -12 6 -10 0 0Z"/></g>`;
+    const leaf = (x, y, c, r) => `<path d="M${x} ${y}l8 -10l8 10l-4 2l4 8l-12 -4l-12 4l4 -8l-4 -2z" fill="${c}" transform="rotate(${r} ${x} ${y})"/>`;
+    return sky(p, [[0, '#2a1060'], [.5, '#8a3a8a'], [.8, '#ff7a3d'], [1, '#ffc15a']]) + stars(9, 22, 0, 120, '#ffe9c0') +
+      `<defs>${glowDef(p + 'mn', '#ffd27a', 1)}</defs><circle cx="95" cy="110" r="95" fill="url(#${p}mn)"/><circle cx="95" cy="110" r="52" fill="#ffd9a0"/><circle cx="82" cy="100" r="8" fill="#f2b872"/><circle cx="108" cy="124" r="6" fill="#f2b872"/><circle cx="110" cy="90" r="4" fill="#f2b872"/>` +
+      bat(250, 60, 1) + bat(320, 110, .8) + bat(180, 130, .6) + bat(370, 50, .7) +
+      `<path d="M330 330C332 260 322 220 340 150M334 220C350 200 372 196 392 180M338 180C320 170 304 160 296 138" stroke="#2a1450" stroke-width="12" fill="none" stroke-linecap="round"/>` +
+      `<g><path d="M392 180v22" stroke="#6a4a8a" stroke-width="2"/><circle cx="392" cy="214" r="12" fill="#ffd24d"/><circle cx="392" cy="214" r="22" fill="#ffd24d" opacity=".25"/></g>` +
+      `<path d="M0 312Q100 296 200 312T400 306V400H0Z" fill="#4a2a5e"/><path d="M0 348Q120 334 220 350T400 344V400H0Z" fill="#35194a"/>` +
+      pumpkin(36, 360, .85) + pumpkin(372, 378, 1) + pumpkin(100, 392, .5) +
+      leaf(130, 120, '#ff9a3c', 20) + leaf(300, 190, '#ffd24d', -30) + leaf(60, 250, '#ff6a3c', 40) + leaf(255, 110, '#ffb347', 10) + leaf(350, 300, '#ff9a3c', -20) +
+      shadow(200, 346, 120) +
+      blob([
+        '<path d="M120 252C80 262 40 262 6 248L10 274C55 296 110 292 140 280Z"/>',
+        '<ellipse cx="188" cy="236" rx="72" ry="70"/>',
+        { l: 'M168 288L152 328', w: 42 }, { l: 'M134 337L182 337', w: 24 }, { l: 'M216 292L228 328', w: 38 }, { l: 'M218 337L264 337', w: 22 },
+        '<path d="M222 192C238 172 252 158 268 150L310 190L270 245Z"/>',
+        { l: 'M232 222L266 242', w: 12 },
+      ], B, D, 11) +
+      `<ellipse cx="204" cy="262" rx="44" ry="42" fill="#f4ffc0"/>` + spots([[60, 262, 9], [100, 274, 8], [140, 205, 10], [170, 190, 9], [210, 185, 8]], '#8ab82a') +
+      blob(['<path d="M262 160C262 132 296 124 330 134C358 142 364 166 346 178C320 190 282 188 268 176Z"/>'], B, D, 11) +
+      blob(['<ellipse cx="294" cy="108" rx="44" ry="38"/>'], '#ff9a3c', '#8a3a00', 11) +
+      `<path d="M262 94q14-24 38-22" fill="none" stroke="#ffd09a" stroke-width="6" stroke-linecap="round"/>` +
+      [[256, 120], [262, 96], [276, 78], [298, 70], [322, 76], [336, 96], [338, 120]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#ffd24d" stroke="#8a3a00" stroke-width="3.5"/>`).join('') +
+      ceye(312, 150, 13, '#6a3aa8') + `<path d="M296 134q14-8 30 0" fill="none" stroke="${D}" stroke-width="5" stroke-linecap="round"/>` + smile(308, 172, 24, D) + blush(290, 166, 8) + `<ellipse cx="350" cy="148" rx="2.6" ry="3.4" fill="${D}"/>` +
+      `<path d="M266 244l8 4m-8-4l4 9" stroke="#fff6dc" stroke-width="4" stroke-linecap="round"/>` + toes(158, 341) + toes(240, 341) + grass(60, 350, .9, '#4a8a3a', '#1d3a1a') + grass(340, 352, 1, '#4a8a3a', '#1d3a1a');
+  }
+
+  // ---------- 15. สไตราโคซอรัส : ทุ่งลาเวนเดอร์ดาวตก (หันซ้าย) ----------
+  function styra(p) {
+    const B = '#e8b04a', D = '#7a4a0a';
+    let sp = '';
+    for (let i = 0; i < 8; i++) {
+      const a = Math.PI * (1.1 + i * 0.1), x = 300 + Math.cos(a) * 46, y = 178 + Math.sin(a) * 50, x2 = 300 + Math.cos(a) * 88, y2 = 178 + Math.sin(a) * 94;
+      sp += `<path d="M${(x - 9 * Math.sin(a)).toFixed(1)} ${(y + 9 * Math.cos(a)).toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}L${(x + 9 * Math.sin(a)).toFixed(1)} ${(y - 9 * Math.cos(a)).toFixed(1)}Z" fill="#fff0c8" stroke="#b58a3a" stroke-width="3.5" stroke-linejoin="round"/>`;
+    }
+    const lav = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0V-20" stroke="#3a9a5a" stroke-width="2.5"/><g fill="#b07aff">${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${i % 2 ? 3 : -3}" cy="${-22 - i * 6}" rx="3.6" ry="4.4"/>`).join('')}</g></g>`;
+    let field = '';
+    const r = rnd(41);
+    for (let row = 0; row < 7; row++) { const y = 316 + row * 14, s = .6 + row * .18; for (let x = (row % 2) * 8; x < 410; x += 16 * s + 6) field += lav(x + r() * 4, y, s); }
+    const windmill = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-14 0L-9 -60H9L14 0Z" fill="#5a3a8a"/><path d="M-12 -60L0 -76L12 -60Z" fill="#3a2060"/><g stroke="#8a6ac8" stroke-width="5" stroke-linecap="round"><path d="M0 -64L-40 -100M0 -64L40 -28M0 -64L40 -100M0 -64L-40 -28"/></g></g>`;
+    const dino = blob([
+      '<path d="M82 268C56 280 36 302 22 320L58 320C88 308 108 296 120 286Z"/>',
+      '<ellipse cx="175" cy="255" rx="100" ry="58"/>',
+      { l: 'M118 292L116 336', w: 38 }, { l: 'M160 296L160 338', w: 38 }, { l: 'M216 296L218 338', w: 38 }, { l: 'M256 290L262 336', w: 38 },
+    ], B, D, 11) +
+      `<ellipse cx="190" cy="282" rx="70" ry="26" fill="#fff0c0"/>` + spots([[110, 235, 10], [150, 220, 11], [195, 218, 10], [235, 230, 9], [90, 258, 7]], '#c98a2a') +
+      `<ellipse cx="300" cy="178" rx="52" ry="58" fill="#7a4a0a"/>` + sp + `<ellipse cx="300" cy="178" rx="45" ry="52" fill="#e0486a"/><ellipse cx="300" cy="178" rx="32" ry="38" fill="#ff7aa0"/>` +
+      `<g fill="#fff0c8">${spots([[280, 150, 6], [310, 140, 6], [325, 168, 5], [275, 180, 6], [300, 200, 5]], '#ffb0c8')}</g>` +
+      blob(['<path d="M285 206C285 176 336 170 372 192C386 204 384 228 368 236C340 250 300 248 288 230Z"/>'], B, D, 11) +
+      blob(['<path d="M362 200C386 196 398 210 392 224C382 236 364 232 358 220Z"/>'], '#ffd76b', '#a8761b', 5) +
+      `<path d="M340 192L372 188L376 128L350 168Z" fill="#fff0c8" stroke="#b58a3a" stroke-width="4" stroke-linejoin="round"/>` +
+      ceye(334, 206, 12, '#2f9a8a') + `<path d="M318 188q14-8 28 0" fill="none" stroke="${D}" stroke-width="5" stroke-linecap="round"/>` + smile(334, 228, 22, D) + blush(318, 224, 8) +
+      toes(116, 340) + toes(262, 340);
+    return sky(p, [[0, '#2b1a7a'], [.5, '#9a4ac0'], [.85, '#ff9ab0'], [1, '#ffd0a0']]) + stars(17, 40, 0, 170) +
+      `<path d="M90 40L40 100" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".9"/>${star4(92, 38, 10, '#fff')}<path d="M260 20L215 70" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>${star4(262, 18, 7, '#fff')}` +
+      `<path d="M330 70a34 34 0 1 0 28 54a28 28 0 1 1 -28 -54Z" fill="#fff3c0"/>` +
+      `<path d="M0 300Q100 280 200 296T400 290V320H0Z" fill="#6a3a9a"/>` + windmill(70, 300, .9) +
+      `<rect x="0" y="312" width="400" height="88" fill="#5a2a8a"/>` + field +
+      shadow(200, 344, 130) + mirror(dino, .92);
+  }
+
   window.DINOS = [
     { id: 'trex',  th: 'ทีเร็กซ์',          en: 'T-Rex',            art: trex },
     { id: 'tric',  th: 'ไทรเซอราทอปส์',     en: 'Triceratops',      art: tric },
@@ -360,6 +540,11 @@
     { id: 'para',  th: 'พาราซอโรโลฟัส',     en: 'Parasaurolophus',  art: para },
     { id: 'carno', th: 'คาร์โนทอรัส',       en: 'Carnotaurus',      art: carno },
     { id: 'dipl',  th: 'ดิพลอโดคัส',        en: 'Diplodocus',       art: dipl },
-    { id: 'ther',  th: 'เทริซิโนซอรัส',     en: 'Therizinosaurus',  art: ther }
+    { id: 'ther',  th: 'เทริซิโนซอรัส',     en: 'Therizinosaurus',  art: ther },
+    { id: 'giga',  th: 'จิกาโนโตซอรัส',     en: 'Giganotosaurus',   art: giga },
+    { id: 'argent',th: 'อาร์เจนติโนซอรัส',  en: 'Argentinosaurus',  art: argent },
+    { id: 'igua',  th: 'อิกัวโนดอน',        en: 'Iguanodon',        art: igua },
+    { id: 'pachy', th: 'แพคิเซฟาโลซอรัส',   en: 'Pachycephalosaurus', art: pachy },
+    { id: 'styra', th: 'สไตราโคซอรัส',      en: 'Styracosaurus',    art: styra }
   ];
 })();
