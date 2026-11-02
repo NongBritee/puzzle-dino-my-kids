@@ -71,6 +71,7 @@
       grid.appendChild(b);
     });
     document.querySelectorAll('.lvl').forEach(b => b.classList.toggle('on', +b.dataset.n === save.n));
+    $('#count').textContent = `ไดโนเสาร์ ${DINOS.length} ตัว — เลื่อนลงดูเพิ่ม 👇`;
   }
   document.querySelectorAll('.lvl').forEach(b => b.onclick = () => {
     audio(); sfx.tap(); save.n = +b.dataset.n; persist();
