@@ -350,184 +350,152 @@
       `<path d="M150 336h26M222 336h26" stroke="#fff6dc" stroke-width="0"/>` + toes(160, 338) + toes(238, 338) + flakes;
   }
 
-  // ======== ชุดที่ 2: สไตล์การ์ตูนตัวละคร (เส้นขอบหนา ตาโต ลายจุด กอหญ้า) ========
-  const ceye = (x, y, r, iris) =>
-    `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#1d1d1d" stroke-width="3.5"/><circle cx="${x + r * .12}" cy="${y + r * .05}" r="${r * .7}" fill="${iris}"/><circle cx="${x + r * .12}" cy="${y + r * .05}" r="${r * .4}" fill="#111"/><circle cx="${x + r * .38}" cy="${y - r * .28}" r="${r * .24}" fill="#fff"/><circle cx="${x - r * .15}" cy="${y + r * .3}" r="${r * .1}" fill="#fff"/>`;
-  const grass = (x, y, s, c = '#3fa84a', o = '#1d5a2a') => {
-    const b = (dx, h, w) => `<path d="M${x + dx - w} ${y}L${x + dx} ${y - h * s}L${x + dx + w} ${y}Z"/>`;
-    const sh = b(-12, 26, 6) + b(0, 34, 7) + b(12, 24, 6);
-    return `<g fill="${o}" stroke="${o}" stroke-width="6" stroke-linejoin="round">${sh}</g><g fill="${c}">${sh}</g>`;
-  };
-  const spots = (arr, c) => arr.map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${(r * .78).toFixed(1)}" fill="${c}"/>`).join('');
-  const shadow = (x, y, rx) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="9" fill="#000" opacity=".22"/>`;
-  const teethLine = (x0, y0, x1, y1, n, sz, down = true) => {
-    let s = '';
-    for (let i = 0; i < n; i++) {
-      const t = n === 1 ? 0 : i / (n - 1), x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t;
-      s += `<path d="M${(x - sz / 2).toFixed(1)} ${y.toFixed(1)}l${sz} 0l${-sz / 2} ${down ? sz * 1.6 : -sz * 1.6}z" fill="#fff" stroke="#6a3030" stroke-width="1.5" stroke-linejoin="round"/>`;
-    }
-    return s;
-  };
+  // ======== ชุดที่ 2: สไตล์ตัดกระดาษซ้อนชั้น (paper-cut) — ไม่มีเส้นขอบ มีเงาใต้แผ่น + ผิวกระดาษ ========
+  const PAPER = (p) => `<defs><filter id="${p}sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="3" stdDeviation="2.2" flood-color="#1b1030" flood-opacity=".38"/></filter><filter id="${p}gr" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .1  0 0 0 0 .05  0 0 0 0 .15  0 0 0 .55 -.18"/></filter></defs>`;
+  const grain = (p) => `<rect width="400" height="400" filter="url(#${p}gr)" opacity=".6"/>`;
+  const pl = (p, d, fill) => `<path d="${d}" fill="${fill}" stroke="${fill}" stroke-width="6" stroke-linejoin="round" filter="url(#${p}sh)"/>`;
+  const pp = (d, fill) => `<path d="${d}" fill="${fill}" stroke="${fill}" stroke-width="5" stroke-linejoin="round"/>`;
+  const pg = (p, fill, items) => `<g filter="url(#${p}sh)" fill="${fill}" stroke="${fill}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">${items.map(i => typeof i === 'string' ? `<path d="${i}"/>` : `<path d="${i.l}" fill="none" stroke-width="${i.w}"/>`).join('')}</g>`;
+  const dots = (arr, c) => arr.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`).join('');
+  const tri = (x, y, s, c) => `<path d="M${x - s * .6} ${y + s * .5}L${x} ${y - s}L${x + s * .6} ${y + s * .5}Z" fill="${c}" stroke="${c}" stroke-width="4" stroke-linejoin="round"/>`;
+  const diamond = (x, y, s, c) => `<path d="M${x} ${y - s}L${x + s * .7} ${y}L${x} ${y + s}L${x - s * .7} ${y}Z" fill="${c}" stroke="${c}" stroke-width="3" stroke-linejoin="round"/>`;
+  const deye = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#2a1a2e"/><circle cx="${x + r * .3}" cy="${y - r * .32}" r="${r * .34}" fill="#fff"/>`;
+  const cheek = (x, y, r, c = '#ff8a8a') => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".7"/>`;
+  const smileP = (x, y, w) => `<path d="M${x} ${y}q${w / 2} ${w * .5} ${w} 0" fill="none" stroke="#2a1a2e" stroke-width="3.5" stroke-linecap="round"/>`;
+  const leaf = (p, x, y, r, c) => `<ellipse cx="${x}" cy="${y}" rx="7" ry="20" fill="${c}" transform="rotate(${r} ${x} ${y})" filter="url(#${p}sh)"/>`;
+  const pine2 = (p, x, y, s, c) => pl(p, `M${x - 18 * s} ${y}L${x} ${y - 52 * s}L${x + 18 * s} ${y}Z`, c) + pl(p, `M${x - 14 * s} ${y - 26 * s}L${x} ${y - 70 * s}L${x + 14 * s} ${y - 26 * s}Z`, c);
+  const skyG = (p, stops) => `<defs><linearGradient id="${p}s" x1="0" y1="0" x2="0" y2="1">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient></defs><rect width="400" height="400" fill="url(#${p}s)"/>`;
 
-  // ---------- 11. จิกาโนโตซอรัส : พายุสายฟ้ากับดอกไม้ยักษ์ ----------
+  // ---------- 11. จิกาโนโตซอรัส : ภูเขาหมอกกับตะวันแดง ----------
   function giga(p) {
-    const B = '#4a6cf0', D = '#18287a';
-    const flowerBig = (x, y, s, c1, c2) => {
-      let o = `<path d="M${x} ${y}C${x - 8 * s} ${y - 40 * s} ${x + 6 * s} ${y - 60 * s} ${x} ${y - 70 * s}" stroke="#1f8a5a" stroke-width="${5 * s}" fill="none"/><circle cx="${x}" cy="${y - 80 * s}" r="${46 * s}" fill="${c1}" opacity=".3"/>`;
-      for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283; o += `<ellipse cx="${(x + Math.cos(a) * 17 * s).toFixed(1)}" cy="${(y - 80 * s + Math.sin(a) * 17 * s).toFixed(1)}" rx="${13 * s}" ry="${9 * s}" transform="rotate(${(a * 57.3).toFixed(0)} ${(x + Math.cos(a) * 17 * s).toFixed(1)} ${(y - 80 * s + Math.sin(a) * 17 * s).toFixed(1)})" fill="${c1}"/>`; }
-      return o + `<circle cx="${x}" cy="${y - 80 * s}" r="${9 * s}" fill="${c2}"/>`;
-    };
-    return sky(p, [[0, '#150c3a'], [.45, '#4b2585'], [.8, '#c0509a'], [1, '#ff9ac0']]) +
-      `<defs>${glowDef(p + 'lg', '#fff6a0', 1)}</defs>` +
-      `<g fill="#2a1760"><ellipse cx="60" cy="50" rx="90" ry="36"/><ellipse cx="330" cy="40" rx="100" ry="40"/><ellipse cx="190" cy="85" rx="80" ry="28"/><ellipse cx="380" cy="120" rx="50" ry="22"/></g>` +
-      `<g fill="#6a3aa8" opacity=".8"><ellipse cx="70" cy="95" rx="60" ry="20"/><ellipse cx="310" cy="85" rx="70" ry="20"/></g>` +
-      `<circle cx="215" cy="150" r="90" fill="url(#${p}lg)" opacity=".7"/><path d="M232 60L196 140L222 140L190 230L262 120L232 120L262 60Z" fill="#fff36b" stroke="#ffb400" stroke-width="4" stroke-linejoin="round"/>` +
-      `<path d="M-10 300L40 210L90 280L150 200L210 290L280 215L340 285L410 230V320H-10Z" fill="#3a1d6e"/><path d="M0 318Q100 300 200 316T400 308V400H0Z" fill="#40206f"/><path d="M0 352Q120 338 220 354T400 348V400H0Z" fill="#2c1556"/>` +
-      flowerBig(40, 345, .95, '#ff7bd8', '#ffe14d') + flowerBig(360, 352, 1.05, '#5fe3ff', '#fff') + flowerBig(330, 390, .6, '#ffb347', '#fff') + fly(14, 12, 150, 320, '#ffe6ff') +
-      shadow(200, 344, 130) +
-      blob([
-        '<path d="M135 215C92 232 45 226 10 196C28 262 80 298 152 292Z"/>',
-        '<ellipse cx="190" cy="232" rx="66" ry="78"/>',
-        { l: 'M165 285L148 328', w: 42 }, { l: 'M130 337L176 337', w: 24 }, { l: 'M215 290L226 328', w: 38 }, { l: 'M214 337L260 337', w: 22 },
-        '<path d="M195 180C195 150 208 128 228 116L284 144L250 205Z"/>',
-        '<path d="M226 146L334 130C338 168 306 192 268 190C240 186 226 168 226 146Z"/>'
-      ], B, D, 11) +
-      `<ellipse cx="206" cy="258" rx="40" ry="56" fill="#ffe9a8"/>` +
-      `<g fill="none" stroke="#2f4ad0" stroke-width="7" stroke-linecap="round"><path d="M135 208q16-14 36-10M150 228q18-14 38-10M170 190q16-8 32-2"/></g>` +
-      spots([[60, 232, 9], [95, 250, 8], [30, 215, 6]], '#2f4ad0') +
-      `<path d="M232 148L330 134C330 164 304 180 270 178C250 176 236 166 232 148Z" fill="#c7283f"/><ellipse cx="278" cy="170" rx="24" ry="8" fill="#ff7f9a"/>` +
-      blob(['<path d="M208 112C208 64 275 50 322 76C346 90 352 118 336 134L226 152C212 142 208 126 208 112Z"/>'], B, D, 11) +
-      teethLine(244, 150, 326, 136, 6, 9) + teethLine(262, 184, 318, 174, 3, 7, false) +
-      ceye(278, 94, 15, '#ffd23f') + `<path d="M256 70q22-14 44 2" fill="none" stroke="${D}" stroke-width="7" stroke-linecap="round"/><ellipse cx="340" cy="104" rx="3.4" ry="5" fill="${D}"/>` + blush(250, 126, 9) +
-      `<path d="M222 82l6-18l8 14M240 62l8-16l6 16" fill="#7f9bff" stroke="${D}" stroke-width="3.5" stroke-linejoin="round"/>` +
-      blob([{ l: 'M234 212L264 234', w: 12 }], B, D, 6) + `<path d="M264 234l10 2m-10-2l8 8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>` + toes(150, 340) + toes(232, 340) +
-      grass(52, 348, 1, '#3fa84a', '#1d5a2a') + grass(350, 352, 1.1);
+    const B = '#e9b44c', SH = '#c98d28', BE = '#f8e3b0', AC = '#1f4e79';
+    return PAPER(p) + skyG(p, [[0, '#ffe2b8'], [1, '#ffab84']]) +
+      `<circle cx="290" cy="120" r="88" fill="#fff0d8" opacity=".6"/><circle cx="290" cy="120" r="62" fill="#ff5f4d"/>` +
+      pl(p, 'M-10 250L50 180L100 235L170 150L250 240L320 190L410 260V400H-10Z', '#9cc6d8') +
+      pl(p, 'M-10 285L70 215L140 270L220 200L300 275L370 225L410 270V400H-10Z', '#5f9cbc') +
+      `<path d="M0 262H400V282H0Z" fill="#fff" opacity=".3"/>` +
+      pl(p, 'M-10 322L60 262L130 310L210 255L290 315L360 268L410 305V400H-10Z', '#2f6a8f') +
+      pine2(p, 28, 318, 1, AC) + pine2(p, 62, 328, .8, AC) + pine2(p, 352, 322, 1.1, AC) + pine2(p, 386, 330, .8, AC) +
+      `<path d="M120 90q8-8 16 0q8-8 16 0M60 120q6-6 12 0q6-6 12 0" fill="none" stroke="#7a3a4a" stroke-width="3" stroke-linecap="round"/>` +
+      pl(p, 'M-10 346Q100 322 200 340T410 332V400H-10Z', '#1b3f5e') +
+      pg(p, SH, ['M232 268L248 338H294L272 266Z', 'M296 232L320 246L304 262Z']) +
+      pg(p, B, [
+        'M18 262L135 205L165 288Z',
+        'M120 205C150 150 250 145 290 190C310 215 300 270 250 290L150 292C130 270 115 235 120 205Z',
+        'M170 268C148 290 150 320 138 338H192L208 282Z',
+        'M262 190L282 132L350 108L398 134L396 152L318 162L290 196Z'
+      ]) +
+      `<path d="M150 292C170 256 230 250 276 274L262 294Z" fill="${BE}"/>` +
+      [[142, 196], [176, 172], [210, 162], [245, 164], [276, 176]].map(([x, y]) => tri(x, y + 6, 24, AC)).join('') + dots([[60, 255, 8], [92, 245, 7], [40, 262, 5], [175, 225, 8], [215, 215, 9], [250, 225, 7]], '#b8761a') +
+      pp('M300 170L396 156L386 184L322 200Z', SH) + `<path d="M310 168L392 156L318 180Z" fill="#b8283f"/>` +
+      `<path d="M322 160l6 16l6-16zM344 156l6 16l6-16zM366 153l6 15l6-15z" fill="#fff"/>` +
+      deye(338, 134, 8) + cheek(312, 160, 7) + `<path d="M318 112L338 100L350 116Z" fill="${AC}"/>` + `<circle cx="388" cy="136" r="3" fill="#7a4a10"/>` +
+      `<path d="M292 235L312 250" stroke="#fff" stroke-width="0"/>` + `<path d="M296 240l8 8m-4-12l8 6" stroke="#fff6dc" stroke-width="4" stroke-linecap="round"/>` +
+      leaf(p, 40, 350, -20, '#2f8a5a') + leaf(p, 52, 352, 15, '#3fae6a') + leaf(p, 348, 356, 20, '#2f8a5a') + grain(p);
   }
 
-  // ---------- 12. อาร์เจนติโนซอรัส : รุ่งอรุณกับบอลลูน ----------
+  // ---------- 12. อาร์เจนติโนซอรัส : ค่ำคืนโคมลอย ----------
   function argent(p) {
-    const B = '#6fe0b0', D = '#1b6b55';
-    const balloon = (x, y, s, c1, c2) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-22 0C-30 -34 -10 -56 0 -56C10 -56 30 -34 22 0Z" fill="${c1}" stroke="#fff" stroke-width="2"/><path d="M-6 0C-14 -30 -4 -52 0 -56C4 -52 14 -30 6 0Z" fill="${c2}"/><path d="M-12 4L-8 18H8L12 4Z" fill="#a8683a"/><path d="M-12 4L-8 18M12 4L8 18" stroke="#6a3f1f" stroke-width="2"/></g>`;
-    const bird = (x, y, s = 1) => `<path d="M${x - 8 * s} ${y}q${4 * s} ${-6 * s} ${8 * s} 0q${4 * s} ${-6 * s} ${8 * s} 0" fill="none" stroke="#7a4a6a" stroke-width="2.5" stroke-linecap="round"/>`;
-    const tinyBird = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="9" ry="7" fill="#ffd24d" stroke="#8a5a10" stroke-width="2.5"/><path d="M${x + 7} ${y - 2}l7 2l-7 3z" fill="#ff8a3d"/><circle cx="${x + 3}" cy="${y - 2}" r="1.8" fill="#222"/>`;
-    return sky(p, [[0, '#ffa8c8'], [.45, '#ffd0a0'], [.8, '#fff0b0'], [1, '#fffbe0']]) +
-      `<defs>${glowDef(p + 'sn', '#fffbd0', 1)}</defs><circle cx="205" cy="270" r="170" fill="url(#${p}sn)"/><circle cx="205" cy="270" r="62" fill="#fff6b8"/>` +
-      `<g stroke="#fff6b8" stroke-width="6" stroke-linecap="round" opacity=".6">${[0, 1, 2, 3, 4, 5, 6].map(i => { const a = Math.PI * (1.05 + i * .15); return `<path d="M${(205 + Math.cos(a) * 80).toFixed(0)} ${(270 + Math.sin(a) * 80).toFixed(0)}L${(205 + Math.cos(a) * 130).toFixed(0)} ${(270 + Math.sin(a) * 130).toFixed(0)}"/>`; }).join('')}</g>` +
-      balloon(70, 130, 1.1, '#ff6b8a', '#ffd24d') + balloon(330, 90, 1, '#4dabf7', '#fff') + balloon(250, 170, .7, '#9775fa', '#ff9de0') + bird(140, 80) + bird(300, 150, .8) + bird(40, 60, .7) +
-      cloud(40, 250, 1.1, '#fff', .95) + cloud(360, 240, 1.2, '#fff', .95) + cloud(130, 215, .8, '#ffe8f0', .9) +
-      `<path d="M0 300Q100 280 200 298T400 290V400H0Z" fill="#a8e6a0"/><path d="M0 340Q120 322 220 342T400 334V400H0Z" fill="#7bd68a"/>` +
-      flower(30, 372, 7, '#ff8fd0') + flower(380, 378, 7, '#fff') + flower(90, 388, 5, '#ffd24d', '#ff8fd0') +
-      shadow(200, 346, 160) +
-      blob([
-        '<path d="M110 222C75 234 45 222 26 186C12 180 8 196 14 208C34 262 85 292 138 288Z"/>',
-        '<ellipse cx="200" cy="250" rx="118" ry="68"/>',
-        '<path d="M268 235C300 195 296 150 290 112L338 114C346 156 350 215 322 268Z"/>',
-        '<ellipse cx="322" cy="92" rx="40" ry="29"/>',
-        { l: 'M118 300L118 336', w: 48 }, { l: 'M170 306L172 338', w: 46 }, { l: 'M238 306L238 338', w: 46 }, { l: 'M288 298L292 336', w: 48 },
-      ], B, D, 11) +
-      `<ellipse cx="208" cy="288" rx="92" ry="28" fill="#d9fff0"/>` +
-      spots([[120, 232, 12], [165, 215, 13], [215, 220, 12], [260, 235, 11], [300, 165, 8], [310, 205, 8], [90, 258, 8]], '#3fc08f') +
-      `<g fill="#3fc08f" stroke="${D}" stroke-width="3.5" stroke-linejoin="round"><path d="M294 190l-14 -4l14 -10z M298 160l-14 -4l14 -10z M300 130l-12 -4l12 -10z M138 204l-4 -16l14 8z M176 192l-2 -16l14 8z M214 190l0 -16l14 8z"/></g>` +
-      tinyBird(180, 186) + tinyBird(240, 192) +
-      ceye(334, 86, 12.5, '#7a4a2a') + smile(332, 104, 22, D) + blush(312, 102, 8) + `<ellipse cx="358" cy="92" rx="2.4" ry="3.4" fill="${D}"/>` +
-      toes(118, 340) + toes(172, 342) + toes(238, 342) + toes(292, 340) + grass(40, 354, 1.1) + grass(360, 352, 1);
+    const B = '#b9a4e0', SH = '#9a84c8', BE = '#efe6ff', AC = '#6b4fa8';
+    const lantern = (x, y, s, c) => `<g transform="translate(${x} ${y}) scale(${s})"><circle r="30" fill="${c}" opacity=".28"/><rect x="-10" y="-14" width="20" height="26" rx="6" fill="${c}" filter="url(#${p}sh)"/><rect x="-10" y="-14" width="20" height="5" rx="2" fill="#fff" opacity=".5"/><path d="M0 12v10" stroke="#ffd" stroke-width="1.5"/></g>`;
+    return PAPER(p) + skyG(p, [[0, '#121c4a'], [.6, '#2b3a86'], [1, '#5a5aa8']]) +
+      [[30, 40], [120, 30], [200, 70], [260, 25], [340, 60], [380, 20], [60, 120], [160, 130], [350, 130]].map(([x, y], i) => diamond(x, y, 3 + (i % 3), '#fff3c0')).join('') +
+      `<circle cx="95" cy="95" r="52" fill="#fff6d8" opacity=".25"/>` + pl(p, 'M95 45a50 50 0 1 0 0.1 0Z', '#fff2c8') + dots([[78, 80, 9], [110, 108, 7], [112, 70, 5], [82, 118, 5]], '#ecd9a0') +
+      pl(p, 'M-10 270Q60 220 140 262T290 240T410 270V400H-10Z', '#3a6f9a') +
+      pl(p, 'M-10 300Q80 262 170 296T330 282T410 300V400H-10Z', '#2b5a82') +
+      lantern(300, 130, 1.1, '#ffb347') + lantern(350, 200, .8, '#ff7a8a') + lantern(40, 190, .9, '#ffd24d') + lantern(150, 160, .7, '#ff9d5a') + lantern(235, 110, .6, '#ffd24d') +
+      pl(p, 'M-10 330Q100 306 200 326T410 316V400H-10Z', '#1e4468') +
+      pg(p, SH, [{ l: 'M150 300L150 338', w: 40 }, { l: 'M266 298L268 338', w: 40 }]) +
+      pg(p, B, [
+        'M110 235C70 250 38 232 12 196L6 222C40 284 92 302 140 292Z',
+        'M95 252C95 190 180 170 250 185C310 195 330 250 300 290C270 312 150 312 120 292C105 280 95 268 95 252Z',
+        { l: 'M290 235C328 200 330 150 322 112', w: 46 },
+        'M298 98a28 22 0 1 0 56 0a28 22 0 1 0 -56 0Z',
+        { l: 'M118 300L118 338', w: 42 }, { l: 'M222 304L224 338', w: 42 }
+      ]) +
+      `<path d="M130 298C160 268 250 266 292 298Z" fill="${BE}"/>` +
+      [[130, 205], [160, 192], [192, 188], [224, 190], [254, 198]].map(([x, y]) => diamond(x, y, 11, AC)).join('') + [[310, 190, 6], [318, 150, 6], [304, 220, 6], [290, 252, 5]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${BE}"/>`).join('') + dots([[70, 238, 5], [96, 250, 5]], BE) +
+      deye(340, 94, 6.5) + cheek(326, 108, 6) + smileP(342, 106, 14) + `<circle cx="352" cy="98" r="2" fill="${AC}"/>` +
+      leaf(p, 36, 352, -25, '#46a07a') + leaf(p, 48, 354, 10, '#6cc79a') + leaf(p, 352, 360, 20, '#46a07a') + grain(p);
   }
 
-  // ---------- 13. อิกัวโนดอน : ปราสาทเทพนิยาย ----------
+  // ---------- 13. อิกัวโนดอน : ป่าใบไม้เปลี่ยนสี ----------
   function igua(p) {
-    const B = '#ff8a65', D = '#8f2f14';
-    const tower = (x, y, w, h, wall, roof) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${wall}"/><path d="M${x - 6} ${y}L${x + w / 2} ${y - w * 1.1}L${x + w + 6} ${y}Z" fill="${roof}"/><path d="M${x + w / 2} ${y - w * 1.1}v-16" stroke="#7a5a3a" stroke-width="2.5"/><path d="M${x + w / 2} ${y - w * 1.1 - 16}l14 5l-14 5z" fill="#ff6b8a"/><rect x="${x + w / 2 - 4}" y="${y + 14}" width="8" height="14" rx="4" fill="#6a5a9a"/>`;
-    const butter = (x, y, c) => `<g transform="translate(${x} ${y})"><ellipse cx="-7" cy="-3" rx="8" ry="6" fill="${c}"/><ellipse cx="7" cy="-3" rx="8" ry="6" fill="${c}"/><ellipse cx="-5" cy="5" rx="5" ry="4" fill="${c}"/><ellipse cx="5" cy="5" rx="5" ry="4" fill="${c}"/><rect x="-1.2" y="-6" width="2.4" height="14" rx="1.2" fill="#4a2a5a"/></g>`;
-    return sky(p, [[0, '#8fd5ff'], [.7, '#d8f1ff'], [1, '#fff6ea']]) +
-      cloud(70, 70, 1.2) + cloud(230, 40, .8) + cloud(350, 110, 1) +
-      `<path d="M150 330C190 230 240 220 280 220C330 220 380 250 420 330Z" fill="#8edc88"/>` +
-      `<rect x="250" y="178" width="110" height="60" fill="#ffe2f0"/>` + tower(238, 150, 34, 90, '#ffd0e6', '#7a8cff') + tower(340, 140, 38, 100, '#ffd0e6', '#7a8cff') + tower(284, 120, 44, 118, '#fff0f6', '#ff7aa8') +
-      `<path d="M300 238v-34a12 12 0 0 1 24 0v34Z" fill="#8a5aa8"/>` +
-      `<path d="M-10 322Q80 270 170 310T420 300V400H-10Z" fill="#6fd678"/><path d="M0 300Q60 280 110 296" fill="none" stroke="#a8f0a0" stroke-width="6" opacity=".7"/>` +
-      `<path d="M0 346Q120 328 220 348T400 340V400H0Z" fill="#4cc26a"/>` +
-      `<path d="M215 338Q250 300 276 250" fill="none" stroke="#fff2c0" stroke-width="12" stroke-linecap="round" opacity=".9"/>` +
-      butter(60, 200, '#ff9de0') + butter(150, 140, '#ffd24d') + butter(360, 270, '#9de0ff') + butter(30, 130, '#b9a0ff') +
-      flower(25, 372, 7, '#ff8fd0') + flower(375, 370, 7, '#ffd24d', '#ff8fd0') + flower(110, 390, 6, '#fff') + flower(290, 386, 6, '#ff8fd0') +
-      shadow(200, 344, 130) +
-      blob([
-        '<path d="M130 245C85 260 45 248 14 214C18 272 80 305 150 290Z"/>',
-        '<ellipse cx="195" cy="238" rx="78" ry="60"/>',
-        { l: 'M170 280L152 326', w: 42 }, { l: 'M132 337L180 337', w: 24 }, { l: 'M225 284L240 326', w: 38 }, { l: 'M226 337L272 337', w: 22 },
-        '<path d="M232 195C246 168 262 150 282 138L322 170L282 240Z"/>',
-        { l: 'M240 216L292 200', w: 15 }, { l: 'M250 232L282 255', w: 13 },
-      ], B, D, 11) +
-      `<ellipse cx="208" cy="262" rx="46" ry="38" fill="#ffd9c0"/>` +
-      `<g fill="none" stroke="#e06030" stroke-width="7" stroke-linecap="round"><path d="M135 218q16-14 36-10M152 200q18-12 38-6M180 184q16-8 32-2"/></g>` + spots([[70, 252, 9], [100, 268, 8], [40, 240, 6]], '#e06030') +
-      blob(['<path d="M268 132C272 100 312 94 346 112C364 122 362 148 344 154L288 160C274 154 266 144 268 132Z"/>'], B, D, 11) +
-      `<path d="M334 116C358 112 372 126 366 142C358 156 340 152 334 142Z" fill="#ffd76b" stroke="#a8761b" stroke-width="5" stroke-linejoin="round"/>` +
-      ceye(312, 122, 13, '#2f9a4a') + `<path d="M298 104q14-8 28 0" fill="none" stroke="${D}" stroke-width="5" stroke-linecap="round"/>` + smile(318, 150, 22, D) + blush(298, 142, 8) + `<ellipse cx="354" cy="122" rx="2.5" ry="3.4" fill="${D}"/>` +
-      `<path d="M296 196l22-16l4 14z" fill="#fff6dc" stroke="#c9a85c" stroke-width="3.5" stroke-linejoin="round"/><path d="M290 198l12 4m-12-4l12-6m-12 6l8 8" stroke="#fff6dc" stroke-width="5" stroke-linecap="round"/>` +
-      toes(156, 341) + toes(246, 341) + grass(48, 354, 1) + grass(352, 356, 1.1);
+    const B = '#3f9d8f', SH = '#2e7d72', BE = '#d6f2e6', AC = '#f2b134';
+    return PAPER(p) + skyG(p, [[0, '#fff4d4'], [1, '#ffd29c']]) +
+      `<circle cx="80" cy="90" r="46" fill="#fff9e8"/><circle cx="80" cy="90" r="64" fill="#fff9e8" opacity=".4"/>` +
+      pl(p, 'M-10 250Q80 190 170 240T330 215T410 245V400H-10Z', '#f2b86a') + pine2(p, 40, 238, 1.1, '#e07a3c') + pine2(p, 110, 228, .9, '#f2a03c') + pine2(p, 300, 222, 1, '#e07a3c') + pine2(p, 370, 232, 1.2, '#f2a03c') +
+      pl(p, 'M-10 290Q90 240 190 282T340 260T410 285V400H-10Z', '#e5883f') + pine2(p, 25, 285, 1.3, '#c24a2a') + pine2(p, 85, 278, 1, '#d9623a') + pine2(p, 330, 272, 1.2, '#c24a2a') + pine2(p, 385, 280, 1, '#d9623a') +
+      pl(p, 'M-10 330Q100 296 200 322T410 312V400H-10Z', '#a8472a') +
+      leaf(p, 120, 120, 40, '#e0572f') + leaf(p, 220, 70, -30, '#f2b134') + leaf(p, 330, 140, 60, '#e0572f') + leaf(p, 360, 70, -10, '#f2b134') + leaf(p, 40, 170, 20, '#d9623a') +
+      pl(p, 'M-10 352Q120 332 220 350T410 342V400H-10Z', '#6b3a2a') +
+      pg(p, SH, ['M226 272L234 338H280L264 268Z', { l: 'M250 226L296 214', w: 14 }]) +
+      pg(p, B, [
+        'M130 232C90 245 50 238 12 205L22 262C70 292 120 288 150 274Z',
+        'M120 215C130 160 220 150 262 185C290 210 285 262 240 285L160 292C130 270 112 245 120 215Z',
+        'M170 270C150 290 150 320 140 338H196L212 282Z',
+        'M236 190L262 130L312 140L296 210Z',
+        'M262 128C268 98 310 90 345 104C372 112 376 140 358 150L296 160C274 156 260 146 262 128Z'
+      ]) +
+      `<path d="M300 150C340 154 360 150 366 140L374 136C376 150 350 166 300 164Z" fill="${SH}"/>` + pp('M338 104C366 104 384 120 376 138C366 150 346 146 340 136Z', AC) +
+      `<path d="M160 292C176 262 230 258 262 280L252 292Z" fill="${BE}"/>` +
+      [[140, 184], [168, 166], [200, 158], [232, 164]].map(([x, y]) => tri(x, y + 8, 14, AC)).join('') + dots([[60, 240, 7], [92, 252, 6], [40, 252, 5], [160, 215, 7], [200, 205, 7]], '#7ccfc0') +
+      pp('M290 205L314 186L308 214Z', '#fff6dc') + deye(318, 118, 7.5) + cheek(300, 142, 7, '#ff9a8a') + smileP(312, 148, 16) + `<circle cx="352" cy="112" r="2.6" fill="${SH}"/>` +
+      leaf(p, 52, 360, -20, '#c24a2a') + leaf(p, 64, 362, 20, '#f2b134') + leaf(p, 350, 362, 15, '#d9623a') + grain(p);
   }
 
-  // ---------- 14. แพคิเซฟาโลซอรัส : คืนฟักทองฮาโลวีน ----------
+  // ---------- 14. แพคิเซฟาโลซอรัส : เกาะทรายยามอาทิตย์อัสดง ----------
   function pachy(p) {
-    const B = '#b5e04a', D = '#4a6a10';
-    const pumpkin = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><ellipse rx="52" ry="42" fill="#ff8a1f" stroke="#a84a00" stroke-width="5"/><path d="M-30 -36Q-44 0 -30 36M0 -41V41M30 -36Q44 0 30 36" fill="none" stroke="#d96a00" stroke-width="5"/><rect x="-5" y="-54" width="10" height="16" rx="3" fill="#4a7a2a"/><path d="M-20 -8l10 -14l10 14zM10 -8l10 -14l10 14z" fill="#fff0a0"/><path d="M-22 12Q0 34 22 12Q0 22 -22 12Z" fill="#fff0a0"/></g>`;
-    const bat = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" fill="#2a1450"><path d="M0 0C-6 -10 -18 -12 -28 -4C-22 -4 -20 2 -14 4C-12 0 -6 2 0 8C6 2 12 0 14 4C20 2 22 -4 28 -4C18 -12 6 -10 0 0Z"/></g>`;
-    const leaf = (x, y, c, r) => `<path d="M${x} ${y}l8 -10l8 10l-4 2l4 8l-12 -4l-12 4l4 -8l-4 -2z" fill="${c}" transform="rotate(${r} ${x} ${y})"/>`;
-    return sky(p, [[0, '#2a1060'], [.5, '#8a3a8a'], [.8, '#ff7a3d'], [1, '#ffc15a']]) + stars(9, 22, 0, 120, '#ffe9c0') +
-      `<defs>${glowDef(p + 'mn', '#ffd27a', 1)}</defs><circle cx="95" cy="110" r="95" fill="url(#${p}mn)"/><circle cx="95" cy="110" r="52" fill="#ffd9a0"/><circle cx="82" cy="100" r="8" fill="#f2b872"/><circle cx="108" cy="124" r="6" fill="#f2b872"/><circle cx="110" cy="90" r="4" fill="#f2b872"/>` +
-      bat(250, 60, 1) + bat(320, 110, .8) + bat(180, 130, .6) + bat(370, 50, .7) +
-      `<path d="M330 330C332 260 322 220 340 150M334 220C350 200 372 196 392 180M338 180C320 170 304 160 296 138" stroke="#2a1450" stroke-width="12" fill="none" stroke-linecap="round"/>` +
-      `<g><path d="M392 180v22" stroke="#6a4a8a" stroke-width="2"/><circle cx="392" cy="214" r="12" fill="#ffd24d"/><circle cx="392" cy="214" r="22" fill="#ffd24d" opacity=".25"/></g>` +
-      `<path d="M0 312Q100 296 200 312T400 306V400H0Z" fill="#4a2a5e"/><path d="M0 348Q120 334 220 350T400 344V400H0Z" fill="#35194a"/>` +
-      pumpkin(36, 360, .85) + pumpkin(372, 378, 1) + pumpkin(100, 392, .5) +
-      leaf(130, 120, '#ff9a3c', 20) + leaf(300, 190, '#ffd24d', -30) + leaf(60, 250, '#ff6a3c', 40) + leaf(255, 110, '#ffb347', 10) + leaf(350, 300, '#ff9a3c', -20) +
-      shadow(200, 346, 120) +
-      blob([
-        '<path d="M120 252C80 262 40 262 6 248L10 274C55 296 110 292 140 280Z"/>',
-        '<ellipse cx="188" cy="236" rx="72" ry="70"/>',
-        { l: 'M168 288L152 328', w: 42 }, { l: 'M134 337L182 337', w: 24 }, { l: 'M216 292L228 328', w: 38 }, { l: 'M218 337L264 337', w: 22 },
-        '<path d="M222 192C238 172 252 158 268 150L310 190L270 245Z"/>',
-        { l: 'M232 222L266 242', w: 12 },
-      ], B, D, 11) +
-      `<ellipse cx="204" cy="262" rx="44" ry="42" fill="#f4ffc0"/>` + spots([[60, 262, 9], [100, 274, 8], [140, 205, 10], [170, 190, 9], [210, 185, 8]], '#8ab82a') +
-      blob(['<path d="M262 160C262 132 296 124 330 134C358 142 364 166 346 178C320 190 282 188 268 176Z"/>'], B, D, 11) +
-      blob(['<ellipse cx="294" cy="108" rx="44" ry="38"/>'], '#ff9a3c', '#8a3a00', 11) +
-      `<path d="M262 94q14-24 38-22" fill="none" stroke="#ffd09a" stroke-width="6" stroke-linecap="round"/>` +
-      [[256, 120], [262, 96], [276, 78], [298, 70], [322, 76], [336, 96], [338, 120]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#ffd24d" stroke="#8a3a00" stroke-width="3.5"/>`).join('') +
-      ceye(312, 150, 13, '#6a3aa8') + `<path d="M296 134q14-8 30 0" fill="none" stroke="${D}" stroke-width="5" stroke-linecap="round"/>` + smile(308, 172, 24, D) + blush(290, 166, 8) + `<ellipse cx="350" cy="148" rx="2.6" ry="3.4" fill="${D}"/>` +
-      `<path d="M266 244l8 4m-8-4l4 9" stroke="#fff6dc" stroke-width="4" stroke-linecap="round"/>` + toes(158, 341) + toes(240, 341) + grass(60, 350, .9, '#4a8a3a', '#1d3a1a') + grass(340, 352, 1, '#4a8a3a', '#1d3a1a');
+    const B = '#8aa33a', SH = '#6b8226', BE = '#eef5c8', DM = '#d9693f';
+    const wave = (y, c) => pl(p, `M-10 ${y}q25 -14 50 0t50 0t50 0t50 0t50 0t50 0t50 0t50 0V400H-10Z`, c);
+    const palm = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0Q12 -40 4 -86" stroke="#6a3a2a" stroke-width="9" fill="none" stroke-linecap="round" filter="url(#${p}sh)"/><g fill="#2f8a5a">${[-60, -25, 15, 55].map((r, i) => `<ellipse cx="4" cy="-90" rx="12" ry="38" transform="rotate(${r} 4 -86) translate(0 -26)" filter="url(#${p}sh)"/>`).join('')}</g></g>`;
+    return PAPER(p) + skyG(p, [[0, '#ff8f8a'], [.55, '#ffb78a'], [1, '#ffe29a']]) +
+      `<circle cx="200" cy="230" r="120" fill="#fff2c0" opacity=".45"/><circle cx="200" cy="230" r="70" fill="#ffd45a"/>` +
+      `<path d="M20 80h90M60 100h60M280 60h80M300 82h60" stroke="#fff1e0" stroke-width="9" stroke-linecap="round" opacity=".85"/>` +
+      wave(235, '#6aa8d8') + wave(255, '#4a88c8') + wave(278, '#3a6ab0') + wave(302, '#2c4f94') +
+      palm(40, 330, 1.1) + palm(364, 332, 1) +
+      pl(p, 'M-10 330Q100 300 200 322T410 312V400H-10Z', '#f2d49a') + pl(p, 'M-10 362Q120 342 220 360T410 352V400H-10Z', '#e5bb78') +
+      pg(p, SH, ['M222 288L228 340H272L260 282Z']) +
+      pg(p, B, [
+        'M125 252C80 258 40 256 8 244L12 276C60 296 115 290 145 276Z',
+        'M110 240C110 180 230 168 262 215C282 245 262 292 190 296C135 296 110 270 110 240Z',
+        'M162 282C146 300 150 322 146 340H196L208 288Z',
+        'M232 200L262 160L305 180L280 235Z',
+        'M262 172C262 142 296 132 330 142C358 150 364 174 346 186C320 198 282 194 268 184Z'
+      ]) +
+      `<path d="M140 292C160 262 230 258 262 282L250 296Z" fill="${BE}"/>` + dots([[56, 262, 7], [90, 274, 6], [150, 205, 8], [185, 195, 8], [215, 200, 7]], '#6b8226') +
+      pg(p, DM, ['M254 114a40 36 0 1 0 80 0a40 36 0 1 0 -80 0Z']) +
+      [[256, 124], [262, 98], [280, 80], [304, 74], [326, 82], [338, 104], [338, 128]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#fbe3b0"/>`).join('') + `<path d="M268 100q14-22 38-22" fill="none" stroke="#f2a070" stroke-width="7" stroke-linecap="round"/>` +
+      deye(314, 154, 7.5) + `<path d="M298 140l30-4" stroke="${SH}" stroke-width="5" stroke-linecap="round"/>` + cheek(294, 172, 7) + smileP(312, 174, 18) + `<circle cx="352" cy="158" r="2.6" fill="${SH}"/>` +
+      `<path d="M264 250l9 6m-9-6l3 10" stroke="#fff6dc" stroke-width="4" stroke-linecap="round"/>` +
+      leaf(p, 36, 372, -15, '#2f8a5a') + leaf(p, 360, 374, 15, '#2f8a5a') + grain(p);
   }
 
-  // ---------- 15. สไตราโคซอรัส : ทุ่งลาเวนเดอร์ดาวตก (หันซ้าย) ----------
+  // ---------- 15. สไตราโคซอรัส : ดวงจันทร์ในอวกาศ (หันซ้าย) ----------
   function styra(p) {
-    const B = '#e8b04a', D = '#7a4a0a';
-    let sp = '';
-    for (let i = 0; i < 8; i++) {
-      const a = Math.PI * (1.1 + i * 0.1), x = 300 + Math.cos(a) * 46, y = 178 + Math.sin(a) * 50, x2 = 300 + Math.cos(a) * 88, y2 = 178 + Math.sin(a) * 94;
-      sp += `<path d="M${(x - 9 * Math.sin(a)).toFixed(1)} ${(y + 9 * Math.cos(a)).toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}L${(x + 9 * Math.sin(a)).toFixed(1)} ${(y - 9 * Math.cos(a)).toFixed(1)}Z" fill="#fff0c8" stroke="#b58a3a" stroke-width="3.5" stroke-linejoin="round"/>`;
-    }
-    const lav = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0V-20" stroke="#3a9a5a" stroke-width="2.5"/><g fill="#b07aff">${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${i % 2 ? 3 : -3}" cy="${-22 - i * 6}" rx="3.6" ry="4.4"/>`).join('')}</g></g>`;
-    let field = '';
-    const r = rnd(41);
-    for (let row = 0; row < 7; row++) { const y = 316 + row * 14, s = .6 + row * .18; for (let x = (row % 2) * 8; x < 410; x += 16 * s + 6) field += lav(x + r() * 4, y, s); }
-    const windmill = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-14 0L-9 -60H9L14 0Z" fill="#5a3a8a"/><path d="M-12 -60L0 -76L12 -60Z" fill="#3a2060"/><g stroke="#8a6ac8" stroke-width="5" stroke-linecap="round"><path d="M0 -64L-40 -100M0 -64L40 -28M0 -64L40 -100M0 -64L-40 -28"/></g></g>`;
-    const dino = blob([
-      '<path d="M82 268C56 280 36 302 22 320L58 320C88 308 108 296 120 286Z"/>',
-      '<ellipse cx="175" cy="255" rx="100" ry="58"/>',
-      { l: 'M118 292L116 336', w: 38 }, { l: 'M160 296L160 338', w: 38 }, { l: 'M216 296L218 338', w: 38 }, { l: 'M256 290L262 336', w: 38 },
-    ], B, D, 11) +
-      `<ellipse cx="190" cy="282" rx="70" ry="26" fill="#fff0c0"/>` + spots([[110, 235, 10], [150, 220, 11], [195, 218, 10], [235, 230, 9], [90, 258, 7]], '#c98a2a') +
-      `<ellipse cx="300" cy="178" rx="52" ry="58" fill="#7a4a0a"/>` + sp + `<ellipse cx="300" cy="178" rx="45" ry="52" fill="#e0486a"/><ellipse cx="300" cy="178" rx="32" ry="38" fill="#ff7aa0"/>` +
-      `<g fill="#fff0c8">${spots([[280, 150, 6], [310, 140, 6], [325, 168, 5], [275, 180, 6], [300, 200, 5]], '#ffb0c8')}</g>` +
-      blob(['<path d="M285 206C285 176 336 170 372 192C386 204 384 228 368 236C340 250 300 248 288 230Z"/>'], B, D, 11) +
-      blob(['<path d="M362 200C386 196 398 210 392 224C382 236 364 232 358 220Z"/>'], '#ffd76b', '#a8761b', 5) +
-      `<path d="M340 192L372 188L376 128L350 168Z" fill="#fff0c8" stroke="#b58a3a" stroke-width="4" stroke-linejoin="round"/>` +
-      ceye(334, 206, 12, '#2f9a8a') + `<path d="M318 188q14-8 28 0" fill="none" stroke="${D}" stroke-width="5" stroke-linecap="round"/>` + smile(334, 228, 22, D) + blush(318, 224, 8) +
-      toes(116, 340) + toes(262, 340);
-    return sky(p, [[0, '#2b1a7a'], [.5, '#9a4ac0'], [.85, '#ff9ab0'], [1, '#ffd0a0']]) + stars(17, 40, 0, 170) +
-      `<path d="M90 40L40 100" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".9"/>${star4(92, 38, 10, '#fff')}<path d="M260 20L215 70" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>${star4(262, 18, 7, '#fff')}` +
-      `<path d="M330 70a34 34 0 1 0 28 54a28 28 0 1 1 -28 -54Z" fill="#fff3c0"/>` +
-      `<path d="M0 300Q100 280 200 296T400 290V320H0Z" fill="#6a3a9a"/>` + windmill(70, 300, .9) +
-      `<rect x="0" y="312" width="400" height="88" fill="#5a2a8a"/>` + field +
-      shadow(200, 344, 130) + mirror(dino, .92);
+    const B = '#d6457a', SH = '#aa2f5c', BE = '#ffd3e2', FR = '#ffcf5c', TL = '#2fb5a8';
+    const dino =
+      pg(p, SH, [{ l: 'M118 292L120 338', w: 38 }, { l: 'M232 292L236 338', w: 38 }]) +
+      pg(p, FR, ['M262 205L236 118L272 158L288 84L312 152L348 98L346 168L388 138L352 220Z']) +
+      [[236, 118], [288, 84], [348, 98], [388, 138]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="${TL}"/>`).join('') +
+      `<circle cx="304" cy="184" r="44" fill="${SH}"/><circle cx="304" cy="184" r="30" fill="#ff7aa6"/>` +
+      pg(p, B, [
+        'M80 255C80 200 170 190 235 205C275 215 284 270 252 292L110 296C90 285 80 272 80 255Z',
+        'M92 250L22 300L50 314L122 290Z',
+        { l: 'M150 294L152 338', w: 40 }, { l: 'M262 288L268 336', w: 40 },
+        'M282 216C284 186 332 180 368 200C382 212 380 238 364 246C338 258 298 254 288 240Z'
+      ]) +
+      `<path d="M110 296C140 270 210 266 252 292Z" fill="${BE}"/>` + dots([[110, 236, 8], [145, 222, 9], [185, 218, 8], [225, 228, 7]], '#f26c9c') +
+      pp('M340 202L364 198L368 142Z', '#fff4d8') + pp('M360 212C386 208 396 224 388 236C376 246 362 240 360 230Z', '#f0b84a') +
+      deye(332, 216, 7.5) + cheek(312, 234, 7, '#ffb0c0') + smileP(332, 236, 16) +
+      [[56, 270, 4], [76, 252, 3]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${BE}"/>`).join('');
+    return PAPER(p) + skyG(p, [[0, '#0c1038'], [.6, '#241a62'], [1, '#4a2a86']]) +
+      [[30, 30], [90, 80], [150, 40], [220, 90], [250, 30], [370, 100], [390, 40], [60, 150], [190, 140], [340, 160]].map(([x, y], i) => diamond(x, y, 3 + (i % 3) * 1.5, '#fff3c0')).join('') +
+      `<g transform="translate(95 100) rotate(-18)"><ellipse rx="22" ry="62" transform="rotate(90)" fill="none" stroke="#ffd7a0" stroke-width="7" opacity=".9"/><circle r="36" fill="#ff9a4d" filter="url(#${p}sh)"/><path d="M-30 -8Q0 -22 30 -8M-34 8Q0 -6 34 8" fill="none" stroke="#e5702a" stroke-width="6"/><path d="M-62 0A62 22 0 0 0 62 0" fill="none" stroke="#ffd7a0" stroke-width="7"/></g>` +
+      pl(p, 'M330 70a26 26 0 1 0 0.1 0Z', '#7fd1ff') + `<path d="M318 58q10 6 8 16q-12 0-8-16ZM338 82q8 6 4 14q-10-4-4-14Z" fill="#6ecf8a"/>` +
+      pl(p, 'M-10 290Q80 262 170 288T330 276T410 294V400H-10Z', '#6a5ab8') + pl(p, 'M-10 320Q100 296 200 318T410 310V400H-10Z', '#8a7ad0') +
+      `<ellipse cx="60" cy="338" rx="26" ry="8" fill="#6a5ab8"/><ellipse cx="350" cy="340" rx="34" ry="9" fill="#6a5ab8"/><ellipse cx="300" cy="375" rx="26" ry="7" fill="#6a5ab8"/>` +
+      mirror(dino, .92) + grain(p);
   }
 
   window.DINOS = [
