@@ -3,18 +3,19 @@
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 body{font-family:"Mali","Noto Sans Thai","Sarabun",system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--sky1),var(--sky2));}
 #app{position:fixed;inset:0}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column}
 [hidden]{display:none!important}
 
 /* ---------- เมนู ---------- */
-#menu{overflow-y:auto;touch-action:pan-y;padding:calc(10px + var(--safe-t)) 14px calc(20px + var(--safe-b));align-items:center}
+#menu{overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:calc(10px + var(--safe-t)) 14px calc(20px + var(--safe-b));align-items:center}
 h1{margin:6px 0 8px;font-size:clamp(26px,6vw,46px);text-align:center;text-shadow:0 3px 0 #fff}
 .emoji{display:inline-block;animation:bob 2.2s ease-in-out infinite}
 .emoji:last-child{animation-delay:-1.1s}
 @keyframes bob{50%{transform:translateY(-6px) rotate(6deg)}}
+#count{margin:0 0 6px;font-size:18px;opacity:.75}
 #levels{display:flex;gap:12px;margin-bottom:12px}
 .lvl{font:inherit;color:var(--ink);background:#fff;border:4px solid transparent;border-radius:22px;padding:6px 22px;font-size:18px;line-height:1.1;box-shadow:0 4px 0 rgba(58,42,106,.25);cursor:pointer}
 .lvl b{font-size:30px}.lvl small{opacity:.7}
@@ -62,3 +63,4 @@ h1{margin:6px 0 8px;font-size:clamp(26px,6vw,46px);text-align:center;text-shadow
 #ref svg{width:100%;height:100%;display:block}
 #hand{position:absolute;left:0;top:0;font-size:52px;line-height:1;z-index:90;pointer-events:none;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35));margin:-8px 0 0 -16px}
 @media(min-width:800px) and (min-height:700px){#play header{height:calc(140px + var(--safe-t))}#ref{width:120px;height:120px}}
+@media(min-width:980px){#grid{width:min(900px,100%,calc((100vh - 250px) * 5 / 3))}}
