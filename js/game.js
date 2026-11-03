@@ -66,12 +66,12 @@
     DINOS.forEach((d, i) => {
       const b = document.createElement('button');
       b.className = 'card'; b.setAttribute('aria-label', d.th);
-      b.innerHTML = `<svg viewBox="0 0 400 400">${d.art('m' + (uid++) + '-')}</svg>${hasDone(d) ? '<span class="star">⭐</span>' : ''}`;
+      b.innerHTML = `${d.img ? `<img src="${d.img}" alt="" loading="lazy" decoding="async">` : `<svg viewBox="0 0 400 400">${d.art('m' + (uid++) + '-')}</svg>`}${hasDone(d) ? '<span class="star">⭐</span>' : ''}`;
       b.onclick = () => { audio(); sfx.tap(); startPuzzle(i); };
       grid.appendChild(b);
     });
     document.querySelectorAll('.lvl').forEach(b => b.classList.toggle('on', +b.dataset.n === save.n));
-    $('#count').textContent = `ไดโนเสาร์ ${DINOS.length} ตัว — เลื่อนลงดูเพิ่ม 👇`;
+    $('#count').textContent = `ทั้งหมด ${DINOS.length} ภาพ — เลื่อนลงดูเพิ่ม 👇`;
   }
   document.querySelectorAll('.lvl').forEach(b => b.onclick = () => {
     audio(); sfx.tap(); save.n = +b.dataset.n; persist();
@@ -84,18 +84,19 @@
 
   // ---------- จิ๊กซอว์ ----------
   const stage = $('#stage');
-  let cur = 0, n = 3, S = 300, cell = 100, bx = 0, by = 0;
+  let cur = 0, n = 3, S = 300, Hb = 300, cw = 100, ch = 100, asp = 1, bx = 0, by = 0;
   let board, slots = [], pieces = [], placedCount = 0, zTop = 10, finished = false, tray = null;
 
   function startPuzzle(i) {
     cur = i; n = save.n; finished = false; placedCount = 0; stopFx();
     $('#menu').hidden = true; $('#play').hidden = false; $('#win').hidden = true;
     stage.innerHTML = ''; stage.classList.remove('done');
-    const d = DINOS[i];
+    const d = DINOS[i]; asp = d.aspect || 1;
+    const full = (pre) => d.img ? `<img src="${d.img}" alt="">` : `<svg viewBox="0 0 400 400">${d.art(pre + (uid++) + '-')}</svg>`;
     board = document.createElement('div'); board.id = 'board';
-    board.innerHTML = `<div class="ghost"><svg viewBox="0 0 400 400">${d.art('g' + (uid++) + '-')}</svg></div><div class="full"><svg viewBox="0 0 400 400">${d.art('f' + (uid++) + '-')}</svg></div>`;
+    board.innerHTML = `<div class="ghost">${full('g')}</div><div class="full">${full('f')}</div>`;
     stage.appendChild(board);
-    $('#ref').innerHTML = `<svg viewBox="0 0 400 400">${d.art('r' + (uid++) + '-')}</svg>`;
+    $('#ref').innerHTML = full('r');
     idleReset();
     slots = []; pieces = [];
     for (let k = 0; k < n * n; k++) {
@@ -109,7 +110,9 @@
     for (let k = 0; k < n * n; k++) {
       const r = (k / n) | 0, c = k % n, w = 400 / n;
       const el = document.createElement('div'); el.className = 'piece';
-      el.innerHTML = `<svg viewBox="${c * w} ${r * w} ${w} ${w}">${d.art('p' + (uid++) + '-')}</svg>`;
+      if (d.img) {
+        Object.assign(el.style, { backgroundImage: `url("${d.img}")`, backgroundSize: `${n * 100}% ${n * 100}%`, backgroundPosition: `${c / (n - 1) * 100}% ${r / (n - 1) * 100}%`, backgroundRepeat: 'no-repeat' });
+      } else el.innerHTML = `<svg viewBox="${c * w} ${r * w} ${w} ${w}">${d.art('p' + (uid++) + '-')}</svg>`;
       stage.appendChild(el);
       const p = { el, idx: k, tray: order.indexOf(k), placed: false, x: 0, y: 0, s: 1 };
       pieces.push(p); bindDrag(p);
@@ -124,34 +127,35 @@
     const landscape = W > H * 1.15;
     let tx, ty, tw, th;
     if (landscape) {
-      S = Math.max(120, Math.min(H - 2 * m, W * .5)); bx = m + 6; by = (H - S) / 2;
+      S = Math.max(120, Math.min((H - 2 * m) * asp, W * .5)); Hb = S / asp; bx = m + 6; by = (H - Hb) / 2;
       tx = bx + S + m * 1.5; ty = m; tw = W - tx - m; th = H - 2 * m;
     } else {
-      S = Math.max(120, Math.min(W - 2 * m - 8, H * .5)); bx = (W - S) / 2; by = m;
-      tx = m; ty = by + S + m * 1.4; tw = W - 2 * m; th = H - ty - m;
+      S = Math.max(120, Math.min(W - 2 * m - 8, H * .5 * asp)); Hb = S / asp; bx = (W - S) / 2; by = m;
+      tx = m; ty = by + Hb + m * 1.4; tw = W - 2 * m; th = H - ty - m;
     }
-    cell = S / n;
-    Object.assign(board.style, { left: bx + 'px', top: by + 'px', width: S + 'px', height: S + 'px' });
-    slots.forEach((s, k) => Object.assign(s.style, { left: (k % n) * cell + 'px', top: ((k / n) | 0) * cell + 'px', width: cell + 'px', height: cell + 'px' }));
-    // ถาดวางชิ้นส่วน
-    let t = Math.min(cell, th), gap, cols = 1, rows = pieces.length;
+    cw = S / n; ch = Hb / n;
+    Object.assign(board.style, { left: bx + 'px', top: by + 'px', width: S + 'px', height: Hb + 'px' });
+    slots.forEach((s, k) => Object.assign(s.style, { left: (k % n) * cw + 'px', top: ((k / n) | 0) * ch + 'px', width: cw + 'px', height: ch + 'px' }));
+    // ถาดวางชิ้นส่วน (t = ความกว้างชิ้นในถาด)
+    const ra = ch / cw;
+    let t = Math.min(cw, th / ra), gap, cols = 1, rows = pieces.length;
     for (; t >= 44; t -= 4) {
       gap = Math.max(8, t * .1); cols = Math.max(1, Math.floor((tw + gap) / (t + gap))); rows = Math.ceil(pieces.length / cols);
-      if (rows * (t + gap) - gap <= th) break;
+      if (rows * (t * ra + gap) - gap <= th) break;
     }
-    tray = { t, gap, cols, rows, tx, ty, tw, th };
+    tray = { t, gap, cols, rows, tx, ty, tw, th, ra };
     pieces.forEach(p => {
-      p.el.style.width = p.el.style.height = cell + 'px';
+      p.el.style.width = cw + 'px'; p.el.style.height = ch + 'px';
       if (p.dragging) return;
-      if (p.placed) setPos(p, bx + (p.idx % n) * cell, by + ((p.idx / n) | 0) * cell, 1);
-      else { const q = trayPos(p.tray); setPos(p, q.x, q.y, tray.t / cell); }
+      if (p.placed) setPos(p, bx + (p.idx % n) * cw, by + ((p.idx / n) | 0) * ch, 1);
+      else { const q = trayPos(p.tray); setPos(p, q.x, q.y, tray.t / cw); }
     });
   }
   function trayPos(i) {
-    const { t, gap, cols, tx, ty, tw, th } = tray, total = pieces.length;
+    const { t, gap, cols, tx, ty, tw, th, ra } = tray, total = pieces.length, rh = t * ra;
     const row = (i / cols) | 0, col = i % cols, inRow = Math.min(cols, total - row * cols);
-    const rowsH = Math.ceil(total / cols) * (t + gap) - gap;
-    return { x: tx + (tw - (inRow * (t + gap) - gap)) / 2 + col * (t + gap), y: ty + (th - rowsH) / 2 + row * (t + gap) };
+    const rowsH = Math.ceil(total / cols) * (rh + gap) - gap;
+    return { x: tx + (tw - (inRow * (t + gap) - gap)) / 2 + col * (t + gap), y: ty + (th - rowsH) / 2 + row * (rh + gap) };
   }
   function setPos(p, x, y, s) { p.x = x; p.y = y; p.s = s; p.el.style.transform = `translate(${x}px,${y}px) scale(${s})`; }
 
@@ -162,26 +166,26 @@
       if (p.placed || finished || p.dragging) return;
       audio(); idleReset(); e.preventDefault(); el.setPointerCapture(e.pointerId);
       const r = stage.getBoundingClientRect(), X = e.clientX - r.left, Y = e.clientY - r.top;
-      fx = (X - p.x) / (cell * p.s); fy = (Y - p.y) / (cell * p.s);   // จุดที่จับ (สัดส่วนในชิ้น)
+      fx = (X - p.x) / (cw * p.s); fy = (Y - p.y) / (ch * p.s);   // จุดที่จับ (สัดส่วนในชิ้น)
       sx = X; sy = Y; t0 = performance.now(); moved = false; p.dragging = true;
       el.classList.add('drag'); el.style.zIndex = ++zTop;
-      setPos(p, X - fx * cell, Y - fy * cell, 1); sfx.pick();
+      setPos(p, X - fx * cw, Y - fy * ch, 1); sfx.pick();
     });
     el.addEventListener('pointermove', (e) => {
       if (!p.dragging) return;
       const r = stage.getBoundingClientRect(), X = e.clientX - r.left, Y = e.clientY - r.top;
       if (Math.hypot(X - sx, Y - sy) > 8) moved = true;
-      setPos(p, X - fx * cell, Y - fy * cell, 1);
+      setPos(p, X - fx * cw, Y - fy * ch, 1);
     });
     const end = (e) => {
       if (!p.dragging) return;
       idleReset();
       p.dragging = false; el.classList.remove('drag');
-      const sl = { x: bx + (p.idx % n) * cell, y: by + ((p.idx / n) | 0) * cell };
+      const sl = { x: bx + (p.idx % n) * cw, y: by + ((p.idx / n) | 0) * ch };
       const d = Math.hypot(p.x - sl.x, p.y - sl.y);
-      if (e.type !== 'pointercancel' && d < cell * .6) place(p, sl);
+      if (e.type !== 'pointercancel' && d < Math.min(cw, ch) * .6) place(p, sl);
       else {
-        const q = trayPos(p.tray); el.style.zIndex = ++zTop; setPos(p, q.x, q.y, tray.t / cell);
+        const q = trayPos(p.tray); el.style.zIndex = ++zTop; setPos(p, q.x, q.y, tray.t / cw);
         if (!moved && performance.now() - t0 < 500) hint(p); else if (e.type !== 'pointercancel') sfx.boing();
       }
     };
@@ -190,7 +194,7 @@
   function place(p, sl) {
     p.placed = true; p.el.classList.add('placed'); p.el.style.zIndex = 5;
     setPos(p, sl.x, sl.y, 1); sfx.ding();
-    burst(sl.x + cell / 2, sl.y + cell / 2, 14);
+    burst(sl.x + cw / 2, sl.y + ch / 2, 14);
     if (++placedCount === pieces.length) setTimeout(win, 450);
   }
   function hint(p) {
@@ -206,8 +210,8 @@
   function idleReset() { idleStop(); if (!finished) idleT = setTimeout(demo, 5000); }
   function demo() {
     const p = pieces.find(q => !q.placed && !q.dragging); if (!p || finished) return;
-    const t = tray.t / 2, fx = p.x + t, fy = p.y + t;
-    const tx = bx + (p.idx % n) * cell + cell / 2, ty = by + ((p.idx / n) | 0) * cell + cell / 2;
+    const fx = p.x + tray.t / 2, fy = p.y + tray.t * tray.ra / 2;
+    const tx = bx + (p.idx % n) * cw + cw / 2, ty = by + ((p.idx / n) | 0) * ch + ch / 2;
     hand = document.createElement('div'); hand.id = 'hand'; hand.textContent = '👆'; stage.appendChild(hand);
     const s = slots[p.idx]; s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash');
     const f = (x, y, sc) => `translate(${x}px,${y}px) scale(${sc})`;
